@@ -74,6 +74,8 @@ Python
 
 ```bash
 # Cloud Shell
+git clone https://github.com/browny/gke101.git
+cd gke101/lab1
 
 # Upload Dockerfile
 cat Dockerfile
@@ -91,22 +93,21 @@ docker rm -f py-web-server
 Nodejs
 
 ```bash
-# Create VM with container runtime
-gcloud compute instances create vm-with-container-runtime --zone=asia-east1-b --machine-type=g1-small \
-  --image-family=cos-stable --image-project=cos-cloud
+# Cloud Shell
+git clone https://github.com/browny/gke101.git
+cd gke101/lab1
 
 # Upload Dockerfile
 cat Dockerfile-nodejs
 
 # Build container image
-docker build -t node-web-server:v1 . -f Dockerfile-nodejs
+docker build -t node-web-server:v1 -f Dockerfile-nodejs .
 
 # Run container
 docker run -d -p 3000:3000 --name node-web-server -h my-web-server node-web-server:v1
 
 curl http://localhost:3000
 docker rm -f node-web-server
-
 ```
 
 ### Upload the image to a registry
@@ -131,7 +132,7 @@ gcloud container images list-tags gcr.io/${GCP_PROJECT}/py-web-server
 
 # Make image public accessible (optional), then you can run anywhere
 gsutil iam ch allUsers:objectViewer "gs://artifacts.${GCP_PROJECT}.appspot.com"
-docker run -d -p 8888:8888 -h my-web-server gcr.io/${GCP_PROJECT}/py-web-server:v1
+docker run -d -p 8080:8888 -h my-web-server gcr.io/${GCP_PROJECT}/py-web-server:v1
 ```
 
 Nodejs
@@ -141,7 +142,7 @@ export GCP_PROJECT=`gcloud config list core/project --format='value(core.project
 
 # Rebuild the Docker image with a registry name that includes gcr.io as the hostname and the project
 # ID as a prefix
-docker build -t "gcr.io/${GCP_PROJECT}/node-web-server:v1" .
+docker build -t "gcr.io/${GCP_PROJECT}/node-web-server:v1" -f Dockerfile-nodejs .
 
 # Configure Docker to use gcloud as a Container Registry credential helper (you are only required to
 # do this once).
@@ -154,10 +155,12 @@ gcloud container images list-tags gcr.io/${GCP_PROJECT}/node-web-server
 
 # Make image public accessible (optional), then you can run anywhere
 gsutil iam ch allUsers:objectViewer "gs://artifacts.${GCP_PROJECT}.appspot.com"
-docker run -d -p 3000:3000 -h my-web-server gcr.io/${GCP_PROJECT}/node-web-server:v1
+docker run -d -p 8080:3000 -h my-web-server gcr.io/${GCP_PROJECT}/node-web-server:v1
 ```
 
 ### Run the web server container on Compute Engine
+
+Python
 
 ```bash
 # Run container on Compute Engine instance
@@ -169,6 +172,21 @@ gcloud beta compute instances create-with-container py-web-server --zone=asia-ea
 gcloud compute firewall-rules create allow-8888 --direction=INGRESS \
   --priority=1000 --network=default --action=ALLOW --rules=tcp:8888 --source-ranges=0.0.0.0/0 \
   --target-tags=web-server
+```
+
+Nodejs
+
+```bash
+# Run container on Compute Engine instance
+gcloud beta compute instances create-with-container node-web-server --zone=asia-east1-b \
+  --machine-type=g1-small --tags=web-server \
+  --container-image="gcr.io/${GCP_PROJECT}/node-web-server:v1"
+
+# Expose to internet
+gcloud compute firewall-rules create allow-3000 --direction=INGRESS \
+  --priority=1000 --network=default --action=ALLOW --rules=tcp:3000 --source-ranges=0.0.0.0/0 \
+  --target-tags=web-server
+
 ```
 
 ## Lab2
@@ -183,12 +201,12 @@ Run in Cloud Shell
 
 # (optional) make kubectl with auto-completion
 source <(kubectl completion bash)
+cd gke101/lab2
 ```
 
 ### Run and deploy a container
 
 ```bash
-
 # kubectl run nginx --image=nginx:1.10.0 --generator=deployment/apps.v1beta1 --dry-run -o yaml
 kubectl create -f deploy.yaml
 
@@ -205,17 +223,30 @@ kubectl get services
 
 ### Scale up
 
-```bash
+````bash
 kubectl scale deployment nginx --replicas 3
 kubectl get pods
 kubectl get services # external IP has not changed
 
 curl http://<External IP>:80
+
+
+### Load testing
+
+```bash
+gcloud compute instances create loadtest \
+  --zone=asia-east1-b --machine-type=g1-small --image-family=debian-9 --image-project=debian-cloud
+
+sudo apt-get update
+sudo apt-get install -y wrk
 wrk -t4 -c100 -d30s http://<External IP>:80
 
 # https://github.com/wercker/stern (Multi pod and container log tailing for Kubernetes)
+# https://github.com/wercker/stern/releases, upload stern_linux_amd64
+sudo mv stern_linux_amd64 /usr/local/bin/stern
+sudo chmod 777 /usr/local/bin/stern
 stern "nginx.*"
-```
+````
 
 ### Clean up
 
