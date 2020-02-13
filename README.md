@@ -227,7 +227,7 @@ kubectl get services
 
 ### Scale up
 
-````bash
+```bash
 kubectl scale deployment nginx --replicas 3
 kubectl get pods
 kubectl get services # external IP has not changed
