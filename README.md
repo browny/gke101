@@ -37,7 +37,7 @@ gcloud compute instances create webserver \
   --zone=asia-east1-b --machine-type=g1-small --image-family=debian-9 --image-project=debian-cloud
 
 # Config Nodejs env (SSH into VM `webserver`)
-sudo apt-get install curl software-properties-common
+sudo apt-get install -y curl software-properties-common
 curl -sL https://deb.nodesource.com/setup_12.x | sudo bash -
 sudo apt-get install -y nodejs
 
@@ -165,13 +165,13 @@ Python
 ```bash
 # Run container on Compute Engine instance
 gcloud beta compute instances create-with-container py-web-server --zone=asia-east1-b \
-  --machine-type=g1-small --tags=web-server \
+  --machine-type=g1-small --tags=webserver \
   --container-image="gcr.io/${GCP_PROJECT}/py-web-server:v1"
 
 # Expose to internet
 gcloud compute firewall-rules create allow-8888 --direction=INGRESS \
   --priority=1000 --network=default --action=ALLOW --rules=tcp:8888 --source-ranges=0.0.0.0/0 \
-  --target-tags=web-server
+  --target-tags=webserver
 ```
 
 Nodejs
@@ -179,13 +179,13 @@ Nodejs
 ```bash
 # Run container on Compute Engine instance
 gcloud beta compute instances create-with-container node-web-server --zone=asia-east1-b \
-  --machine-type=g1-small --tags=web-server \
+  --machine-type=g1-small --tags=webserver \
   --container-image="gcr.io/${GCP_PROJECT}/node-web-server:v1"
 
 # Expose to internet
 gcloud compute firewall-rules create allow-3000 --direction=INGRESS \
   --priority=1000 --network=default --action=ALLOW --rules=tcp:3000 --source-ranges=0.0.0.0/0 \
-  --target-tags=web-server
+  --target-tags=webserver
 
 ```
 
@@ -196,6 +196,10 @@ Kubernetes Basics
 ### Start a kubernetes cluster
 
 ```bash
+# Create cluster
+gcloud container clusters create "my-vpc-cluster" --region "asia-east1" \
+  --machine-type "g1-small" --num-nodes "1" --enable-ip-alias
+
 # Press `Connect` button to configure kubectl command
 Run in Cloud Shell
 
@@ -229,15 +233,15 @@ kubectl get pods
 kubectl get services # external IP has not changed
 
 curl http://<External IP>:80
-
+```
 
 ### Load testing
 
 ```bash
 gcloud compute instances create loadtest \
-  --zone=asia-east1-b --machine-type=g1-small --image-family=debian-9 --image-project=debian-cloud
+  --zone=asia-east1-b --machine-type=g1-small --image-family=debian-9 --image-project=debian-cloud \
+  --scopes=https://www.googleapis.com/auth/cloud-platform
 
-sudo apt-get update
 sudo apt-get install -y wrk
 wrk -t4 -c100 -d30s http://<External IP>:80
 
