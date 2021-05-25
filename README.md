@@ -46,7 +46,7 @@ curl -sL https://deb.nodesource.com/setup_12.x | sudo bash -
 sudo apt-get install -y nodejs
 
 # Code a simple web service
-npm init
+npm init -y
 npm install express --save
 vim hello.js
 
@@ -58,13 +58,13 @@ app.get('/', function (req, res) {
    res.send('Hello World from GCE!');
 });
 
-app.listen(3000, function () {
+app.listen(8888, function () {
    console.log('Example app listening on port 3000!');
 });
 ---
 
 node hello.js &
-curl http://localhost:3000
+curl http://localhost:8888
 
 # Create firewall rule to open internet access
 
