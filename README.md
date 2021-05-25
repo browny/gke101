@@ -22,7 +22,8 @@ pip3 install tornado
 
 git clone https://github.com/browny/gke101.git
 cd gke101
-python3 web-server.py &
+pip3 install tornado
+python3 lab1/web-server.py &
 
 curl http://localhost:8888
 
