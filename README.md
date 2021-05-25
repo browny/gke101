@@ -17,7 +17,7 @@ gcloud compute instances create webserver \
 
 # Run web-server as VM-based style (SSH into VM `webserver`)
 sudo apt-get update
-sudo apt-get install -y python3 python3-pip
+sudo apt-get install -y python3 python3-pip git
 pip3 install tornado
 python3 web-server.py &
 
