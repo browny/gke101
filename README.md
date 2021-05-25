@@ -19,6 +19,9 @@ gcloud compute instances create webserver \
 sudo apt-get update
 sudo apt-get install -y python3 python3-pip git
 pip3 install tornado
+
+git clone https://github.com/browny/gke101.git
+cd gke101
 python3 web-server.py &
 
 curl http://localhost:8888
