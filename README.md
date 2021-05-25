@@ -59,7 +59,7 @@ app.get('/', function (req, res) {
 });
 
 app.listen(8888, function () {
-   console.log('Example app listening on port 3000!');
+   console.log('Example app listening on port 8888!');
 });
 ---
 
@@ -108,9 +108,9 @@ cat Dockerfile-nodejs
 docker build -t node-web-server:v1 -f Dockerfile-nodejs .
 
 # Run container
-docker run -d -p 3000:3000 --name node-web-server -h my-web-server node-web-server:v1
+docker run -d -p 8888:8888 --name node-web-server -h my-web-server node-web-server:v1
 
-curl http://localhost:3000
+curl http://localhost:8888
 docker rm -f node-web-server
 ```
 
@@ -161,7 +161,7 @@ gcloud container images list-tags gcr.io/${GCP_PROJECT}/node-web-server
 
 # Make image public accessible (optional), then you can run anywhere
 gsutil iam ch allUsers:objectViewer "gs://artifacts.${GCP_PROJECT}.appspot.com"
-docker run -d -p 8080:3000 -h my-web-server gcr.io/${GCP_PROJECT}/node-web-server:v1
+docker run -d -p 8080:8888 -h my-web-server gcr.io/${GCP_PROJECT}/node-web-server:v1
 ```
 
 ### Run the web server container on Compute Engine
@@ -189,8 +189,8 @@ gcloud beta compute instances create-with-container node-web-server --zone=asia-
   --container-image="gcr.io/${GCP_PROJECT}/node-web-server:v1"
 
 # Expose to internet
-gcloud compute firewall-rules create allow-3000 --direction=INGRESS \
-  --priority=1000 --network=default --action=ALLOW --rules=tcp:3000 --source-ranges=0.0.0.0/0 \
+gcloud compute firewall-rules create allow-8888 --direction=INGRESS \
+  --priority=1000 --network=default --action=ALLOW --rules=tcp:8888 --source-ranges=0.0.0.0/0 \
   --target-tags=webserver
 
 ```
