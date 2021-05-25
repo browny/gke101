@@ -119,6 +119,7 @@ docker rm -f node-web-server
 Python
 
 ```bash
+gcloud services enable containerregistry.googleapis.com
 export GCP_PROJECT=`gcloud config list core/project --format='value(core.project)'`
 
 # Rebuild the Docker image with a registry name that includes gcr.io as the hostname and the project
@@ -142,6 +143,7 @@ docker run -d -p 8080:8888 -h my-web-server gcr.io/${GCP_PROJECT}/py-web-server:
 Nodejs
 
 ```bash
+gcloud services enable containerregistry.googleapis.com
 export GCP_PROJECT=`gcloud config list core/project --format='value(core.project)'`
 
 # Rebuild the Docker image with a registry name that includes gcr.io as the hostname and the project
